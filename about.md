@@ -4,12 +4,12 @@ title: About
 permalink: /about/
 ---
 
-Some information about you!
+Too much information.
 
 ### More Information
 
-A place to include any other types of information that you'd like to include about yourself.
+I am currently freshman at University of Primorska Famnit.Former basketball player at BC Napredak .Achive several robotics competiton awards.
 
 ### Contact me
 
-[email@domain.com](mailto:email@domain.com)
+[djordjevich0355@gmail.com](mailto:djordjevich0355@gmail.com)
