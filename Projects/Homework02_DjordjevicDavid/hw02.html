@@ -1,0 +1,331 @@
+<html>
+<head>
+	<title>Nba stickermania</title>
+
+<meta charset="UTF-8">
+<style>
+
+
+
+	#canvas {
+	display: inline-block;
+	box-sizing: border-box;
+	border: 3px solid black;
+	border-radius: 2%;
+	background-color: whitesmoke;
+	background-image: url(https://i.pinimg.com/originals/11/59/e8/1159e826f87e9b276ac61d4be71b3332.jpg);
+	cursor: crosshair;
+
+}
+	#stickers{
+	display: inline-block;
+	width: 50px;
+	height: 600px;
+	
+}
+	.sticker {
+	display: inline-block;
+	box-sizing: border-box;
+	width: 50px;
+	margin: 2px;
+	cursor: grab;
+}
+	.color {
+	display: inline-block;
+	box-sizing: border-box;
+	width: 48px;
+	height: 30px;
+	border: 1px solid black;
+	border-radius: 12%;
+	margin: 2px 3px 0px 1px;
+	cursor: copy;
+	transition: transform .2s;
+}
+
+	.color:hover{
+		 -ms-transform: scale(1.5);
+ 		 -webkit-transform: scale(1.5); 
+		  transform: scale(1.5);
+	}
+
+	body{
+	margin:auto;
+	text-align: center;
+	background-color: whitesmoke;
+	margin-top: 10px;
+	background-image: linear-gradient(to bottom right, #49a09d,#C06C84);
+	overflow: scroll;
+	}
+
+	
+
+	#eraser{
+		position: absolute;
+		top: 10;
+		left: 25;
+		height: 300px;
+		width: 300px;
+		cursor: pointer;
+	}
+	#pen{
+		position: absolute;
+		left: 25;
+		bottom: 150;
+		height: 200px;
+		width: 250px;
+		
+
+	}
+	input,label{
+		display: block;
+	}
+	#save{
+		height: 35px;
+
+	}
+	#savebtn{
+		position: absolute;
+		left: 70;
+		bottom: 80;
+
+	}
+	#penCanvas{	
+		border: 1px dashed black;
+		border-radius: 50%;
+		margin-top: 30;
+	}
+	label{
+		margin-top: 30;
+
+	}
+	
+	#thickness{
+		margin: auto;
+		position: relative;
+		top: 10;
+
+
+	}
+	#uploader{
+		display: block;
+		position: absolute;
+		left: 150;
+		bottom: 90;
+	}
+	input[type="button"]{
+		border: none;
+		border-radius: 12px;
+		height: 50px;
+		width: 100px;
+		padding: 2px;
+		text-align: center;
+		background-color: #1E90FF;
+		color: whitesmoke;
+	}
+	input[type="button"]:hover {
+ 	background-color: #008B8B;
+	}
+	input[type="button"]:active {
+  	background-color: #3e8e41;
+  	box-shadow: 0 5px #666;
+  	transform: translateY(4px);
+	}
+</style>
+<script type="text/javascript">
+
+	var canvas, ctx, flag = false,
+        prevX = 0,
+        currX = 0,
+        prevY = 0,
+        currY = 0,
+        eraser = false,
+        flag_court=true;
+
+     var x = "black",
+        y = 2;
+
+	function drag(ev){
+		ev.dataTransfer.setData("text",ev.target.id); // method sets the data type and the value of the dragged data
+
+	}
+	function drop(ev){
+		ev.preventDefault();
+		var data = ev.dataTransfer.getData("text"); //This method will return any data that was set to the same type in the setData() method (id of draggable item)
+		let stickers = document.getElementById(data);
+		ctx.drawImage(stickers,ev.offsetX,ev.offsetY,50,50);
+
+
+	}
+	function allowDrop(ev){
+		ev.preventDefault();
+	}
+
+
+	function eraseAll() {
+        var m = confirm("This will delete whole canvas content!");
+        if (m) {
+            ctx.clearRect(0, 0, w, h);
+        }
+    }
+
+    function init() {
+        canvas = document.getElementById('canvas');
+        var imageLoader = document.getElementById('imageLoad');
+        ctx = canvas.getContext("2d");
+        w = canvas.width;
+        h = canvas.height;
+
+    	imageLoader.addEventListener('change', handleImage, false);
+        canvas.addEventListener("mousemove", function (e){findxy('move', e)}, false);
+        canvas.addEventListener("mousedown", function (e) {findxy('down', e)}, false);		//adding mouse event listeners
+        canvas.addEventListener("mouseup", function (e) {findxy('up', e)}, false);
+        canvas.addEventListener("mouseout", function (e) {findxy('out', e)}, false);
+    }
+    
+    function color(obj) {
+        x = obj.id;
+        var field = document.getElementById(obj.id);
+        canvas = document.getElementById("canvas");
+       	canvas.style.border = "3px solid "+ obj.id; 
+    
+        }
+       
+
+    
+    function draw() {
+    	var thickness = document.getElementById("thickness").value;
+        ctx.beginPath();			
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(currX, currY);
+        ctx.lineCap = 'round'; 			
+        ctx.strokeStyle = x;
+        ctx.lineWidth = thickness;
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    function point(){
+    	var canvaspen=document.getElementById("penCanvas");
+    	var ctx = canvaspen.getContext("2d");
+    	var thickness = document.getElementById("thickness").value
+    	ctx.clearRect(0,0,50,50);
+    	ctx.fillStyle = x;
+  		ctx.beginPath();
+  		ctx.arc(25, 25, thickness/2, 0, 2 * Math.PI, true);
+  		ctx.fill();
+	}
+
+
+    
+    
+    function findxy(res, e) {
+    	var thickness = document.getElementById("thickness").value;
+        if (res == 'down') {
+            prevX = currX;
+            prevY = currY;
+            currX = e.clientX - canvas.offsetLeft;
+            currY = e.clientY - canvas.offsetTop;
+    
+            flag = true;		//if mouse is pressed
+
+            if(eraser){
+            	ctx.clearRect(currX,currY,thickness,thickness);
+            }
+            else{
+            	ctx.beginPath();
+                ctx.fillStyle = x;
+                ctx.arc(currX, currY, thickness/2, 0, 2 * Math.PI, true);
+                ctx.fill();
+                ctx.closePath();
+
+            }
+
+        }
+        if (res == 'up' || res == "out") {
+            flag = false;
+        }
+        if (res == 'move') {
+            if (flag) {
+                prevX = currX;
+                prevY = currY;
+                currX = e.clientX - canvas.offsetLeft;
+                currY = e.clientY - canvas.offsetTop;
+                if(eraser){
+            		ctx.clearRect(currX,currY,thickness,thickness);
+            	}
+            	else{
+                draw();
+            }
+            }
+        }
+    }
+
+    function downloadCanvas() {			/*Download the canvas content*/
+    	let downloadLink = document.createElement('a');
+    	downloadLink.setAttribute('download', 'CanvasAsImage.png');
+    	let canvas = document.getElementById('canvas');
+    	let dataURL = canvas.toDataURL('image/png');
+    	let url = dataURL.replace(/^data:image\/png/,'data:application/octet-stream');
+    	downloadLink.setAttribute('href', url);
+    	downloadLink.click();
+    }
+
+   	function handleImage(e){
+   		ctx.clearRect(0, 0, w, h);
+    	var reader = new FileReader();
+   		reader.onload = function(event){
+        var img = new Image();
+        img.onload = function(){	
+            ctx.drawImage(img,0,0);
+        }
+        img.src = event.target.result;
+    }
+    reader.readAsDataURL(e.target.files[0]);     
+}
+	
+
+</script>
+</head>
+<body onload="init();point()">
+
+
+	<canvas id="canvas" width="800" height="600" ondragover="allowDrop(event)" ondrop="drop(event)"></canvas>
+	<div id="stickers">
+		<img draggable="true" id="prvi" ondragstart="drag(event)" class="sticker" src="http://www.jokermoji.com/wp-content/uploads/images/JokerMoji-stickers-Nikola-Jokic-features.png">
+		<img draggable="true"  id="drugi" ondragstart="drag(event)" class="sticker" src="https://i.pinimg.com/originals/88/9a/f4/889af463a3ed690b83c54c5c867443e8.png">
+		<img draggable="true" id="treci" ondragstart="drag(event)" class="sticker" src="hahaha.png">
+		<img draggable="true" id="cetvrti" ondragstart="drag(event)" class="sticker" src="harden.png">
+		<img draggable="true" id="peti" ondragstart="drag(event)" class="sticker" src="lilard.png">
+		<img draggable="true" id="sesti" ondragstart="drag(event)" class="sticker" src="curry.png">
+		<img draggable="true" id="sedmi" ondragstart="drag(event)" class="sticker" src="jordan.png">
+		<img draggable="true" id="osmi" ondragstart="drag(event)" class="sticker" src="jordanhead.png">
+		<img draggable="true" id="deveti" ondragstart="drag(event)" class="sticker" src="durantfive.png">
+		<img draggable="true" id="deseti" ondragstart="drag(event)" class="sticker" src="lebroncool.png">
+		<img draggable="true" id="jedanaesti" ondragstart="drag(event)" class="sticker" src="dikrbro.png">
+	</div>
+	<div id="bottom">
+	<script>
+	var colorNames = ["black", "gray", "silver", "white", "maroon", "red", "olive", "yellow", "green",
+	"lime", "teal", "aqua", "navy", "blue", "purple", "fuchsia"];
+	for (var i = 0; i < 16; i++) {
+	document.write(`<div id="${colorNames[i]}" class="color" style="background-color:
+	${colorNames[i]}" onclick="color(this);point();eraser=false"></div>`);
+	}
+	</script>
+	</div>
+	<img id="eraser" src="eraser.png" title="Eraser[2xclick delete all]" onclick="eraser=true" ondblclick="eraseAll()">
+	<div id="pen">
+		<canvas width="50" height="50" id="penCanvas" ></canvas>
+		<label for="thicknessPen">Please enter pen thickness:</label>
+		<input type="range" name="thicknessPen" min="0" max="50" value="2" id="thickness" oninput="point()">
+	</div>
+	<div id="savebtn">
+		<input type="image"  id="save" title="Save canvas"  src="https://www.vippng.com/png/full/102-1026530_save-button-png-no-background-floppy-disk-icon.png" / onclick="downloadCanvas()">
+		<small>Save</small>
+	</div>
+	<div id="uploader">
+  			<input type="file" id="imageLoad" style="display: none;" />
+			<input type="button" value="Upload Image" title="Upload your image" onclick="document.getElementById('imageLoad').click();" />
+	</div>
+</body>
+</html>

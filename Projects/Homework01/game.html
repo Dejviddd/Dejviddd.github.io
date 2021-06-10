@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MinesWeeper</title>
+
+<script src="minefield.js"></script>
+<script>
+
+	/*global variables */
+	var minefield = null;
+	var check = 0;
+	var mytime = 30;
+	var check1 = false;
+	var handler = null;
+	var counter=0;
+
+
+	function timerStart(){
+			if(!check1){
+				handler = window.setInterval(decreaseTime,1000);
+				check1 = true;
+			}
+	}
+
+	function timerStop(){
+			if(check1){
+				window.clearInterval(handler);
+				check1 = false;
+
+			}
+	}
+
+	function timerReset(){
+			mytime = 30;
+			printTime();
+	}
+
+	function decreaseTime(){
+		if(mytime != 0){
+			mytime=mytime-1;
+			printTime();
+		}else{
+			document.getElementById("timer").style.color="red";
+			window.alert("Times UP! Game Over!");
+			timerStop();
+			document.getElementById('grid').style.pointerEvents='none';
+		}
+	}
+
+	function printTime(){
+			document.getElementById("timer").innerHTML = mytime;
+		}
+
+	function timeOver() {
+			if(mytime == 0) {
+				timerStop();
+			}
+	}
+
+	function gameStart(){
+		minefield = new Minefield(10, 10, 10);
+		createGrid(10,10);
+		print();
+		check = 1;
+	}
+
+	function gameAgain() {
+		switch(check){
+			case 1:
+			gameEasy();
+			mytime = 31;
+			break;
+
+			case 2:
+			gameMedium();
+			mytime = 61;
+			break;
+
+			case 3:
+			gameHard();
+			mytime = 91;
+			break;
+
+			case 0:
+			gameStart();
+			mytime = 31;
+			break;
+		}
+		var x = document.getElementsByTagName("BODY")[0];
+		x.style.backgroundImage ="url('https://cdn.statically.io/img/wallpapercave.com/wp/wp1906879.jpg')";
+		document.getElementById("grid").style.opacity = "100%";
+        document.getElementById("timer").style.opacity = "100%";
+        document.getElementById("timer").style.color="white";
+        printTime();
+        timerStop();
+	}
+
+	function gameEasy(){
+		timerStop();
+		minefield = new Minefield(10, 10, 10);
+		createGrid(10,10);
+		print();
+		check = 1;
+		timerStop();
+		mytime = 30;
+		printTime();
+		buttonDisable("button1");
+		buttonEnable("button2");
+		buttonEnable("button3");
+	}
+
+	function gameMedium() {
+		minefield = new Minefield(15, 15, 38);
+		createGrid(15,15);
+		print();
+		check = 2;
+		timerStop();
+		mytime = 60;
+		printTime();
+		buttonDisable("button2");
+		buttonEnable("button1");
+		buttonEnable("button3");
+	}
+	
+
+	function gameHard() {
+
+		minefield = new Minefield(20, 20, 60);
+		createGrid(20,20);
+		print();
+		check = 3;
+		timerStop();
+		mytime = 90;
+		printTime();
+		buttonDisable("button3");
+		buttonEnable("button1");
+		buttonEnable("button2");
+	}
+
+	function buttonDisable(Button){
+
+			document.getElementById(Button).style.color = "cyan";
+			document.getElementById(Button).style.backgroundColor = "black";
+			document.getElementById(Button).disabled = true;
+	}
+	function buttonEnable(Button) {
+		document.getElementById(Button).style.color = "white";
+		document.getElementById(Button).style.backgroundColor = "gray";
+		document.getElementById(Button).disabled = false;
+	}
+
+	function print() {
+		var remaining = minefield.veiled + minefield.explosions - 10;
+		document.getElementById("output").innerHTML = minefield.toString() + "\n" + remaining + "/" + minefield.explosions;
+	}
+
+	function createGrid(x,y) {
+            var table = document.getElementById("grid");
+            table.innerHTML = ' ';
+            for (var i = 0; i < x; i++) {
+                var row = table.insertRow(i);
+                for (var j = 0; j < y; j++) {
+                    var cell = row.insertCell(j);
+                    cell.innerHTML = ' ';
+                    cell.onclick = function(){
+                        clickCell(this);
+                        changeTable(x,y);
+                }
+            }
+        }
+    }
+
+    function clickCell(cell){
+      	var cellRow = cell.parentNode.rowIndex;
+        var cellCol = cell.cellIndex;
+        minefield.unveil(cellCol,cellRow);
+            timerStart();
+           if(minefield.unveil(cellCol,cellRow)== 0){  cell.style.backgroundColor = "green"};
+           if(minefield.symbol(cellCol,cellRow) == "&#128163"){
+                cell.style.backgroundColor = "red";
+                cell.className="mines";
+                var x = document.getElementsByTagName("BODY")[0];
+				x.style.background ="url('https://img.17qq.com/images/djjehheopbz.jpeg') no-repeat center fixed";
+				x.style.backgroundSize = "100%";
+                document.getElementById('grid').style.pointerEvents='none';
+                document.getElementById("timer").style.color="red";
+                document.getElementById("grid").style.opacity = "12%";
+                document.getElementById("timer").style.opacity = "12%";
+               	timerStop();
+               	window.alert("Boooom!GAME OVER");
+               	
+  			}
+	}
+    
+    function changeTable(x,y){
+        var table = document.getElementById("grid");
+            for (let i = 0; i < x; i++) {
+                for (let j = 0; j < y; j++) {
+                    var cell = table.rows[j].cells[i];
+                    	if(minefield.symbol(i,j)!= '.'){
+                        	cell.className="clicked";
+                        	cell.innerHTML = minefield.symbol(i,j);   
+                    	}
+                }
+            }
+    }
+
+</script>
+</head>
+<style type="text/css">
+	body{
+		background: url('https://cdn.statically.io/img/wallpapercave.com/wp/wp1906879.jpg') center fixed;
+		background-size: 100%;
+		font-family: Impact,sans serif; 
+	}
+	div{
+
+		border: solid 2px cyan;
+		background-color: gray;
+		box-shadow: 1px 1px gray;
+		border-radius: 5px;
+		width: 40px;
+		height: 40px;
+		text-align: center;
+		padding: 10px;
+		opacity: 90%;
+		text-shadow: 1px 1px black;
+		color: white;
+		font-size: 25pt;
+		margin-left: 47.5%;
+	}
+
+	p{
+		border: solid 2px cyan;
+		background-color: gray;
+		box-shadow: 1px 1px gray;
+		border-radius: 5px; 
+		width: 50%;
+		text-align: center;
+		margin-top: 10px;
+		margin-left: auto;
+		margin-right: auto;
+		margin-bottom: auto;
+		padding: 10px;
+		opacity: 90%;
+		text-shadow: 2px 2px black;
+	}
+
+	#header{
+		background-color: gray;
+		border: solid 5px cyan;
+		box-shadow: 2px 2px gray;
+		padding: 10px;
+		width: 50%;
+		min-width: 400px;
+		font-size: 50pt;
+		border-radius: 5px;
+		opacity: 90%;
+		color:#85144b;
+		}
+
+	input[type=number]{
+		display: none;
+	}
+
+	input[value="New Game"]{
+		margin: 6px;
+		color: white;
+		background-color: gray;
+		border: 1px solid cyan;
+		box-shadow: 0 4px 2px -2px black;
+		border-radius: 5px;
+		font-family: Impact,sans serif;
+		text-shadow: 1px 1px black;
+		font-size: 20px;
+		padding: 10px;
+	}
+
+
+	input[value="Check"]{
+		display: none;
+	}
+
+	input[value="Hit"]{
+		display: none;
+	}
+
+	input[type=button]:hover{
+		background-color:black;	
+	}
+
+	button[type=button]:hover{
+		background-color:black;	
+	}
+
+	#output{
+		background-color: gray;
+		width: 50%;
+		height: 50%;
+		border: 2px solid cyan;
+		box-shadow: 1px 1px gray;
+		border-radius: 5px;
+		color: white;
+		letter-spacing: 15px;
+		text-align: center;
+		margin-top: 100px;
+		margin-left: auto;
+		margin-right: auto;
+		margin-bottom: auto;
+		padding: 10px;
+		opacity: 90%;
+		font-family: Impact,Haettenschweiler,Franklin Gothic Bold,Charcoal,Helvetica Inserat,Bitstream Vera Sans Bold,Arial Black,sans serif;
+	}
+
+	#grid{
+ 		margin-top: 15px;
+		margin-left: auto;
+		margin-right: auto;
+		margin-bottom: 10px;
+		padding: 10px;
+		opacity: 90%;
+	}
+
+	table{
+        border: 2px solid cyan;
+        background-color: gray;
+        color: blue;
+    }
+      	
+    tr,td{
+        background: whitesmoke;
+        width: 33px;
+        height: 33px;
+        text-align: center;
+        font-size: 23px;
+        font-family: Impact,Haettenschweiler,Franklin Gothic Bold,Charcoal,Helvetica Inserat,Bitstream Vera Sans Bold,Arial Black,sans serif;       
+	}
+
+    tr,td:hover{
+    	background-color: #85144b;
+    }
+
+	tr,td.clicked {
+		background-color: pink;
+	}
+
+	pre{
+		display: none;
+	}
+
+	button[type="button"]{
+		margin: 6px;
+		color: white;
+		background-color: gray;
+		border: 1px solid cyan;
+		box-shadow: 0 4px 2px -2px black;
+		border-radius: 5px;
+		font-family: Impact,Haettenschweiler,Franklin Gothic Bold,Charcoal,Helvetica Inserat,Bitstream Vera Sans Bold,Arial Black,sans serif;
+		text-shadow: 1px 1px black;
+		font-size: 20px;
+		padding: 10px;
+	}
+
+</style>
+</head>
+<body>
+<p id="header">Minesweeper</p>
+ <table id = "grid">
+  	<tr>
+  		<td></td>
+  	</tr>
+  </table>
+<pre id="output"></pre>
+<div id="timer">30</div>
+<p>
+	<input type="number" id="x" value="0" min="0" max="9">
+	<input type="number" id="y" value="0" min="0" max="9">
+	<input type="button" value="Check" onclick="check()">
+	<input type="button" value="Hit" onclick="hit()">
+	<input type="button" value="New Game" onclick="gameAgain()">
+	<button type="button" id="button1" value="Easy" onclick="gameEasy()" style="color: red;">Easy</button>
+	<button type="button" id="button2" value="Medium" onclick="gameMedium()" style="color: white;">Medium</button>
+	<button type="button" id="button3" value="Hard" onclick="gameHard()" style="color: white;">Hard</button>
+</p>
+
+<script>
+	gameStart();
+</script>
+
+</body>
+</html>
